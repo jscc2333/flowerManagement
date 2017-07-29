@@ -90,12 +90,12 @@
               </div>
             </div>
             <P class="flower-desc">鲜花描述 {{flower.flowerDesc}}</P>
-            <split></split>
+            <split v-show="flowerIndex<flowerList.length-1"></split>
           </li>
         </ul>
       </div>
     </div>
-    <div class="scroll-top" @click="scrollTop">顶部</div>
+    <div class="scroll-top" @click="scrollTop" v-show="!select[0]">顶部</div>
     <div class="operation-submit">
       <transition name="fade">
         <span class="response" v-show="status !== -1">{{responseMsg}}</span>
@@ -190,6 +190,9 @@ export default {
       };
       this.$http.post('/api/FlowerManageServlet', data).then((res) => {
         this.status = res.body.status_no;
+        if (this.status === 1) {
+          this.cancel();
+        }
         setTimeout(() => {
           this.status = -1;
         }, 2000);
@@ -307,6 +310,9 @@ export default {
           width: 100%;
           .img-wrapper {
             flex: 0 80px;
+            img {
+              border-radius: 10px;
+            }
           }
           .detail-wrapper {
             flex: 1;
@@ -323,7 +329,7 @@ export default {
         .flower-desc {
           margin: 10px 0;
           line-height: 24px;
-          font-size: 14px;
+          font-size: 12px;
         }
       }
     }
