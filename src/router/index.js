@@ -1,11 +1,20 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from 'vue';
+import Router from 'vue-router';
+import flower from '@/components/flower/flower';
+import tip from '@/components/tip/tip';
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   routes: [{
-    path: '/',
-    name: 'Hello'
-  }]
-})
+    path: '/flower',
+    name: 'flower',
+    component: flower
+  },
+  {
+    path: '/tip',
+    name: 'tip',
+    component: tip
+  }
+  ]
+});
