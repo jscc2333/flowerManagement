@@ -74,8 +74,28 @@
         </ul>
       </div>
       <!-- </transition-group> -->
-  
+      <div class="flower-wrapper" v-show="!select[0]">
+        <ul>
+          <li class="flower-item" v-for="(flower,flowerIndex) in flowerList" :key="flowerIndex" @click="selectFlower(flowerIndex)">
+            <div class="content-wrapper">
+              <div class="img-wrapper">
+                <img :src="flower.flowerImg" alt="" width="80" height="80">
+              </div>
+              <div class="detail-wrapper">
+                <span class="flower-id detail">鲜花ID {{flower.flowerID}}</span>
+                <span class="flower-name detail">花名 {{flower.flowerName}}</span>
+                <span class="flower-category detail">鲜花类别 {{flower.category.categoryID}}</span>
+                <span class="flower-total detail">鲜花总数 {{flower.flowerTotal}}</span>
+                <span class="flower-price detail">鲜花价格 {{flower.flowerPrice}}</span>
+              </div>
+            </div>
+            <P class="flower-desc">鲜花描述 {{flower.flowerDesc}}</P>
+            <split></split>
+          </li>
+        </ul>
+      </div>
     </div>
+    <div class="scroll-top" @click="scrollTop">顶部</div>
     <div class="operation-submit">
       <transition name="fade">
         <span class="response" v-show="status !== -1">{{responseMsg}}</span>
@@ -92,20 +112,25 @@
 
  <script type="text/ecmascript-6">
 import Vue from 'vue';
+import split from '@/components/split/split';
 export default {
   data() {
     return {
       status: -1,
-      flowerID: 99,
+      flowerID: 0,
       categoryID: 0,
       flowerName: '',
       flowerDesc: '',
       flowerImg: '',
       flowerTotal: 0,
       flowerPrice: 0,
+      flowerList: [],
       select: [true, false, false],
       operation: ['添加鲜花', '更新鲜花', '删除鲜花']
     };
+  },
+  components: {
+    split: split
   },
   computed: {
     responseMsg() {
@@ -124,6 +149,11 @@ export default {
         this.select[i] = false;
       }
       Vue.set(this.select, index, true);
+      if (index !== 0) {
+        this.$http.get('/api/FlowerManageServlet').then((res) => {
+          this.flowerList = res.body;
+        });
+      }
     },
     submit() {
       let statusNo;
@@ -163,11 +193,34 @@ export default {
         setTimeout(() => {
           this.status = -1;
         }, 2000);
+        this.$http.get('/api/FlowerManageServlet').then((res) => {
+          this.flowerList = res.body;
+        });
       }, (res) => {
 
       });
     },
+    selectFlower(index) {
+      let flower = this.flowerList[index];
+      this.flowerID = flower.flowerID;
+      this.flowerImg = flower.flowerID;
+      this.flowerName = flower.flowerName;
+      this.flowerTotal = flower.flowerTotal;
+      this.flowerPrice = flower.flowerPrice;
+      this.flowerDesc = flower.flowerDesc;
+      this.categoryID = flower.category.categoryID;
+    },
+    scrollTop() {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+    },
     cancel() {
+      this.flowerID = 0;
+      this.flowerImg = '';
+      this.flowerName = '';
+      this.flowerTotal = 0;
+      this.flowerPrice = 0;
+      this.flowerDesc = '';
+      this.categoryID = 0;
     }
   }
 };
@@ -179,70 +232,113 @@ export default {
   top: 42px;
   left: 0;
   right: 0;
-  bottom: 0;
-  .operation-wrapper {
-    display: flex;
-    padding: 10px;
-    .operation-type {
-      flex: 1;
-      height: 20px;
-      line-height: 20px;
-      text-align: center;
-      border-radius: 10px;
-      background: #f3f5f7;
-      font-size: 14px;
-      &.active {
-        color: #fff;
-        background: rgb(0, 160, 220);
+  .flower-operation {
+    .operation-wrapper {
+      display: flex;
+      padding: 10px;
+      .operation-type {
+        flex: 1;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        border-radius: 10px;
+        background: #f3f5f7;
+        font-size: 14px;
+        &.active {
+          color: #fff;
+          background: rgb(0, 160, 220);
+        }
+        &:hover {
+          transform: scale(1.2);
+        }
       }
-      &:hover {
-        transform: scale(1.2);
+    }
+    .operation-insert,
+    .operation-update,
+    .operation-delete {
+      padding: 10px; // &.slide-enter{
+      //   transform:translateY(100%);
+      // }
+      // &.slide-leave-active {
+      //   transform: translateX(-100%);
+      // }
+      // &.slide-enter-active,
+      // &.slide-leave-active {
+      //   transition: all .5s linear;
+      // }
+      .insert-item,
+      .update-item,
+      .delete-item {
+        padding: 5px 10px;
+        margin: 10px 0;
+        border-bottom: 1px solid rgba(7, 17, 27, 0.1);
+        text-align: center;
+        &:last-child {
+          border: none;
+        }
+        .text,
+        .title {
+          display: inline-block;
+          font-size: 12px;
+          height: 18px;
+          line-height: 18px;
+        }
+        .title {
+          width: 48px;
+          text-align: center;
+        }
+        .text {
+          padding: 0 5px;
+          border-radius: 5px;
+          background: #f3f5f7;
+        }
+      }
+    }
+    .flower-wrapper {
+      padding: 10px;
+      margin: 0 10px;
+      border: 1px solid rgba(7, 17, 27, 0.3);
+      border-radius: 10px;
+      .flower-item {
+        position: relative;
+        margin: 10px 0;
+        .content-wrapper {
+          display: flex;
+          width: 100%;
+          .img-wrapper {
+            flex: 0 80px;
+          }
+          .detail-wrapper {
+            flex: 1;
+            margin-left: 12px;
+            .detail {
+              display: inline-block;
+              margin-right: 5px;
+              margin-bottom: 10px;
+              font-size: 14px;
+              color: rgba(7, 17, 27, 0.6)
+            }
+          }
+        }
+        .flower-desc {
+          margin: 10px 0;
+          line-height: 24px;
+          font-size: 14px;
+        }
       }
     }
   }
-  .operation-insert,
-  .operation-update,
-  .operation-delete {
-    padding: 10px; // &.slide-enter{
-    //   transform:translateY(100%);
-    // }
-    // &.slide-leave-active {
-    //   transform: translateX(-100%);
-    // }
-    // &.slide-enter-active,
-    // &.slide-leave-active {
-    //   transition: all .5s linear;
-    // }
-    .insert-item,
-    .update-item,
-    .delete-item {
-      padding: 5px 10px;
-      margin: 10px 0;
-      border-bottom: 1px solid rgba(7, 17, 27, 0.1);
-      text-align: center;
-      &:last-child {
-        border: none;
-      }
-      .text,
-      .title {
-        display: inline-block;
-        font-size: 12px;
-        height: 18px;
-        line-height: 18px;
-      }
-      .title {
-        width: 48px;
-        text-align: center;
-      }
-      .text {
-        padding: 0 5px;
-        border-radius: 5px;
-        background: #f3f5f7;
-      }
-    }
+  .scroll-top {
+    position: fixed;
+    bottom: 40px;
+    right: 10px;
+    padding: 15px 10px;
+    border-radius: 50%;
+    background: rgba(0, 160, 220, 0.5);
+    color: #fff;
   }
   .operation-submit {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
